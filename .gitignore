@@ -1,0 +1,7 @@
+# Clés API : ne jamais versionner
+.env
+
+# Fichiers système / temporaires
+.DS_Store
+__pycache__/
+*.pyc
