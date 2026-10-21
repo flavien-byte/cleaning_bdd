@@ -47,6 +47,31 @@ Principe : ne jamais juger 1 000 lignes dans un seul contexte (la qualité se d�
   - `skills/akiro-cleaning` : skill socle (règles communes) ;
   - `skills/cleaning-<client>` : cible, critères, exclusions apprises, mapping Minari.
 
+## Dédoublonnage (à construire)
+
+But : ne jamais re-traiter ni re-payer (crédits Pipecorn, scraping, qualification) un prospect déjà connu.
+
+- **Registre central** de tout ce qui a déjà été extrait : personnes (clé : URL LinkedIn ; à défaut prénom + nom + domaine de l'entreprise, normalisés) et entreprises (domaine du site ; à défaut SIREN ou raison sociale normalisée), avec la date et le client concerné.
+- **Exclusions par client** dans `clients/<client>/exclusions/` : clients existants du client, prospects déjà en cours chez lui, listes déjà appelées. Fichiers fournis par Flavien, formats variés.
+- Le dédoublonnage passe **en premier**, avant la qualification et avant tout appel payant.
+- Conformément à la règle « jamais de lignes supprimées », un doublon reste dans le fichier avec un motif (ex. « Doublon : déjà extrait le 12/09 pour <client> », « Déjà client »), mais il n'est ni qualifié ni enrichi.
+- À trancher : registre global ou par client ? Où le stocker (Airtable, Google Sheet, fichier) ?
+
+## Feuille de route de la « machine »
+
+1. Onboarding d'un nouveau client : brief en vrac → questions manquantes → `contexte.md`.
+2. Génération de l'URL de recherche Sales Navigator à partir de la cible.
+3. Extraction des prospects (Pipecorn si son API le permet, à vérifier ; sinon export manuel).
+4. Dédoublonnage (registre + exclusions client).
+5. Qualification ligne par ligne (boucle de test sur 50 lignes).
+6. Écriture dans un Google Sheet pour validation client (mode d'accès Google à choisir).
+7. Après validation : enrichissement des mobiles (Pipecorn), puis import Minari.
+8. Capitalisation : exclusions apprises et règles ajoutées au skill du client.
+
+Les skills seront rangés dans `.claude/skills/<nom>/SKILL.md` pour être chargés automatiquement.
+
+Points à vérifier en début de session : accès réseau de l'environnement (ScrapingBee, Pipecorn, Minari, Google bloqués au 21/10 ; réglage grisé côté Flavien), documentation API Pipecorn (lien à fournir par Flavien).
+
 ## Format de livraison
 
 - CSV **UTF-8 avec BOM** (lisible dans Excel), séparateur **virgule**, une ligne par prospect.
