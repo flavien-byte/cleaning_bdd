@@ -26,6 +26,7 @@ from normaliser import cle_texte
 RACINE = Path(__file__).resolve().parent.parent
 VALEURS = {"oui": "Oui", "non": "Non", "a verifier": "À vérifier"}
 COLONNES_TECHNIQUES = ["Statut", "Motif doublon", "Info registre"]  # le motif passe dans Justification
+COLONNES_INFO = ["Site officiel"]  # recopiées après la Justification, pas des critères
 
 
 def normaliser_valeur(texte):
@@ -50,33 +51,37 @@ def main():
 
     prepare = Path(args.prepare).resolve()
     entetes, lignes = lire_fichier(prepare)
-    criteres, verdicts = [], {}
+    criteres, infos, verdicts = [], [], {}
     if args.verdicts:
         entetes_v, lignes_v = lire_csv_dicts(args.verdicts)
-        criteres = [c for c in entetes_v if c not in ("ID ligne", "Justification", "Verdict")]
+        criteres = [c for c in entetes_v if c not in ("ID ligne", "Justification", "Verdict", *COLONNES_INFO)]
+        infos = [c for c in COLONNES_INFO if c in entetes_v]
         verdicts = {r["ID ligne"]: r for r in lignes_v}
 
     i_id, i_statut, i_motif = (entetes.index(c) for c in ("ID ligne", "Statut", "Motif doublon"))
     a_garder = [i for i, e in enumerate(entetes) if e not in COLONNES_TECHNIQUES]
-    nouvelles = ["Verdict"] + criteres + ["Justification"]
+    nouvelles = ["Verdict"] + criteres + ["Justification"] + infos
 
     sortie, compte, exclusions = [], Counter(), Counter()
     for ligne in lignes:
         if ligne[i_statut] == "Doublon":
             verdict, valeurs, justification = "Doublon", [""] * len(criteres), ligne[i_motif]
+            info = [""] * len(infos)
         else:
             r = verdicts.get(ligne[i_id])
             if r:
                 valeurs = [normaliser_valeur(r.get(c, "")) for c in criteres]
                 justification = r.get("Justification", "").strip()
+                info = [r.get(c, "").strip() for c in infos]
             else:
                 valeurs, justification = ["À vérifier"] * len(criteres), "Non qualifiée"
+                info = [""] * len(infos)
             verdict = calculer_verdict(valeurs)
             for critere, valeur in zip(criteres, valeurs):
                 if valeur == "Non":
                     exclusions[critere] += 1
         compte[verdict] += 1
-        sortie.append([verdict] + valeurs + [justification] + [ligne[i] for i in a_garder])
+        sortie.append([verdict] + valeurs + [justification] + info + [ligne[i] for i in a_garder])
 
     nom = prepare.stem.removesuffix("_prepare")
     destination = prepare.parent.parent / "propre" / f"{nom}_qualifie.csv"
