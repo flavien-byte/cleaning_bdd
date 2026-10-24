@@ -82,8 +82,8 @@ Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 - **Les entreprises aussi doivent être nettoyées**, pas seulement les intitulés : il faut des informations sur chaque entreprise (site via ScrapingBee, données Pipecorn, à défaut recherche web). En attendant l'accès aux sites, la recherche web intégrée peut servir pour la boucle de test sur 50 lignes.
 - **Objectif : ne plus faire d'export à la main.** Claude construit la recherche Sales Navigator à partir du contexte, puis la liste est récupérée directement (piste : outils Pipecorn — à vérifier une fois connecté). On ne pilote pas LinkedIn en direct depuis le cloud (bloqué, et risque pour le compte LinkedIn).
 - **salesnav-slicer** (github.com/zoxeavv/salesnav-slicer, d'un collègue) : découpe une recherche Sales Navigator **d'entreprises** trop grosse (≥ 1 000 résultats) en sous-recherches exportables, en pilotant Chrome. Il ne récupère pas les listes. Il s'utilise depuis Claude sur l'ordinateur de Flavien (Chrome), pas dans cette session cloud.
-- **Pipecorn** : serveur MCP officiel `https://mcp.pipecorn.com/mcp` (clé dans l'en-tête `X-API-Key`). Déclaré dans `.mcp.json` à la racine ; il fonctionnera quand (1) la variable `PIPECORN_API_KEY` sera dans les secrets de l'environnement et (2) `mcp.pipecorn.com` sera autorisé dans le réseau.
-- **Minari** : clé à mettre dans les secrets de l'environnement sous `MINARI_API_KEY`, jamais dans le chat (une clé collée le 24/10 doit être régénérée par Flavien).
+- **Pipecorn** : serveur MCP officiel `https://mcp.pipecorn.com/mcp` (doc : https://docs.pipecorn.com/mcp/overview). 41 outils : trouver des entreprises, chercher des leads, **gérer des listes Sales Navigator**, enrichir des contacts, signaux d'achat. C'est la piste pour récupérer les listes sans export manuel. Branchement retenu : **connecteur personnalisé claude.ai** (claude.ai/customize/connectors, connexion OAuth avec le compte Pipecorn). Avant toute grosse extraction ou enrichissement : outils `preview_*` et `get_credits` pour estimer les crédits. Ne jamais mettre la clé Pipecorn dans `Authorization` (réservé au jeton OAuth) ; en secours, secret réseau sur `mcp.pipecorn.com` avec l'en-tête `X-API-Key`.
+- **Minari** : API REST `https://api.minari.ai` (doc : https://api.minari.ai/docs), en-tête `Authorization: Bearer <clé>`. Deux clés ont été collées dans le chat le 24/10 : à régénérer, jamais réutiliser.
 - **Nommage des listes dans Google Sheets** : convention à valider par Flavien.
 
 ### Accès constatés le 24/10/2026 (à revérifier en début de session)
@@ -143,7 +143,11 @@ scripts/
 
 ## Clés API et outils
 
-- Les clés sont dans `.env` à la racine (ou dans les variables d'environnement de la session cloud). **Jamais** dans un script, jamais dans un fichier versionné, jamais affichées dans le chat.
+- Dans la session cloud, les clés sont des **secrets réseau** de l'environnement (paramètres → Ajouter un secret) : le proxy ajoute lui-même l'en-tête d'authentification aux requêtes vers le site autorisé. Les scripts appellent donc l'API **sans clé** ; Claude ne voit jamais la clé.
+  - ScrapingBee : site `app.scrapingbee.com`, en-tête `Authorization`, préfixe `Bearer`.
+  - Minari : site `api.minari.ai`, en-tête `Authorization`, préfixe `Bearer`.
+  - Pipecorn : connecteur claude.ai (OAuth), voir plus haut.
+- En local, `.env` à la racine. **Jamais** dans un script, jamais dans un fichier versionné, jamais collées ni affichées dans le chat.
 - Ordre de branchement :
   | Outil | Usage | Priorité |
   | --- | --- | --- |
