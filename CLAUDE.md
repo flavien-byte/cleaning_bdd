@@ -88,6 +88,8 @@ Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 
 ### Accès constatés le 24/10/2026 (à revérifier en début de session)
 
+**Mise à jour 24/10, fin de journée : Flavien a passé l'environnement en accès réseau complet.** Pipecorn (mcp.pipecorn.com), ScrapingBee, Minari (api.minari.ai) et les sites des entreprises répondent. Il manque encore les clés dans les secrets de l'environnement (`PIPECORN_API_KEY`, `MINARI_API_KEY`, `SCRAPINGBEE_API_KEY`). Le détail ci-dessous date d'avant ce changement.
+
 - **Bloqués** par le réglage réseau de l'environnement cloud : ScrapingBee, Pipecorn (dont mcp.pipecorn.com), Minari, LinkedIn, sites des entreprises (visite directe et outil de lecture web), annuaire officiel des entreprises (api.gouv), societe.com, api.airtable.com en direct.
 - **Joignables** : API Google (Sheets/Drive, il faut un compte de service), recherche web intégrée (limitée), connecteur **Airtable** (utilisable par Claude), connecteur **Notion**.
 - Connecteur **n8n Akiro** : installé côté claude.ai mais pas activé dans les sessions de ce dépôt. n8n ayant accès à Internet, il peut servir de **passerelle** (ScrapingBee, Pipecorn, Minari) si le réglage réseau reste bloqué.
