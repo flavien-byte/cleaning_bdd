@@ -5,3 +5,12 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# Données personnelles (prospects, exclusions, registre) : jamais versionnées
+# (le dépôt GitHub est public au 24/10/2026)
+clients/*/brut/*
+clients/*/travail/*
+clients/*/propre/*
+clients/*/exclusions/*
+registre/registre.csv
+!clients/*/*/.gitkeep
