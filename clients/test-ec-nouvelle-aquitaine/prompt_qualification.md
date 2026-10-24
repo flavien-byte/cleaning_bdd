@@ -1,6 +1,6 @@
 # Prompt de qualification — Test Experts-comptables Nouvelle-Aquitaine
 
-Écrit par Claude à partir de `contexte.md`. Version : v2 du 24/10/2026.
+Écrit par Claude à partir de `contexte.md`. Version : v3 du 24/10/2026.
 Historique des corrections (boucle de test sur 50 lignes) en bas de fichier.
 
 ---
@@ -39,6 +39,10 @@ deviner.
      associé(e) ») : À vérifier (règle à confirmer par Flavien).
    - Si l'entreprise n'est manifestement pas un cabinet (activité Non) et que rien ne dit que la
      personne est expert-comptable : Non.
+   - Entreprise de la ligne qui n'est pas son cabinet (tribunal / cour d'appel où il est expert
+     judiciaire, club, association, mandat), alors que le headline ou un annuaire le donne
+     expert-comptable associé d'un cabinet : juger les critères sur CE cabinet (nommé dans la
+     justification : « jugé sur le cabinet X »).
 2. **Activité** — l'entreprise est un cabinet d'expertise comptable (lu sur le site : tenue
    comptable, bilans, fiscalité, social/paie pour ses clients…). Un groupe ou réseau régional de
    cabinets compte. Un cabinet qui fait aussi audit / conseil / juridique compte.
@@ -80,3 +84,5 @@ Ne calcule pas de Verdict : il est calculé automatiquement.
   futurs experts-comptables → À vérifier ; taille : limite stricte à 50 ; sites déjà trouvés
   transmis d'un prospect à l'autre du même cabinet ; personne hors cabinet sans mention
   d'expertise comptable → Non.
+- v3 (relecture des lignes 51-101, 1 erreur) : prospect rattaché à une autre structure
+  (cour d'appel, club…) → jugé sur son vrai cabinet.
