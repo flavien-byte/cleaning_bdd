@@ -68,9 +68,9 @@ Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 | --- | --- | --- | --- |
 | 1 | Onboarding client : brief en vrac → questions → `contexte.md` → `prompt_qualification.md` | Flavien colle le brief ; Claude remplit (skill `akiro-onboarding`) | ✅ prêt |
 | 2 | Filtres Sales Navigator / Pharow à partir de la cible | Claude propose les filtres à copier ; URL complète auto plus tard si utile | ✅ prêt (version simple) |
-| 3 | Extraction des prospects | Flavien dépose l'export dans `brut/` ; `scripts/lire_export.py` reconnaît les colonnes | ✅ manuel / ⏳ Pipecorn (doc API + accès) |
+| 3 | Extraction des prospects | Claude traduit la consigne en recherche Sales Navigator, la lance via Pipecorn (`preview_advanced_search_leads` gratuit → validation de Flavien → `advanced_search_leads`, `live: true`) et dépose le CSV dans `brut/`. Export manuel toujours possible (`scripts/lire_export.py`) | ✅ testé le 24/10 (152 profils, quota seulement) |
 | 4 | Dédoublonnage (exclusions client + registre + doublons internes) + nettoyage des noms | `scripts/dedoublonner.py` | ✅ prêt (registre en fichier ; Airtable à valider) |
-| 5 | Qualification ligne par ligne, boucle de test 50 lignes, livraison CSV + résumé | Sous-agents Claude, même prompt par ligne ; `scripts/livrer.py` calcule le Verdict | 🟠 intitulés jugeables ; critères entreprise **bloqués** tant que les sites sont inaccessibles |
+| 5 | Qualification ligne par ligne, boucle de test 50 lignes, livraison CSV + résumé | `scripts/recuperer_sites.py` (sites en cache), sous-agents Claude par lots de 10, même prompt ; `scripts/livrer.py` calcule le Verdict | ✅ testé le 24/10 (EC Nouvelle-Aquitaine : 5 puis 1 erreur sur 50) |
 | 6 | Google Sheet pour validation client | Aujourd'hui : Flavien importe le CSV. Plus tard : compte de service Google (API joignable) ou n8n | ✅ manuel / ⏳ auto |
 | 7 | Enrichissement mobiles (Pipecorn) puis import Minari | N'enrichir que les Oui validés par le client, jamais un doublon ; crédits estimés avant ; test sur 5 lignes | ⏳ doc API + accès |
 | 8 | Capitalisation : exclusions apprises → `contexte.md`, prompt, skill `cleaning-<client>` ; registre à jour | Claude après chaque retour client | ✅ prêt |
@@ -85,6 +85,14 @@ Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 - **Pipecorn** : serveur MCP officiel `https://mcp.pipecorn.com/mcp` (doc : https://docs.pipecorn.com/mcp/overview). 41 outils : trouver des entreprises, chercher des leads, **gérer des listes Sales Navigator**, enrichir des contacts, signaux d'achat. C'est la piste pour récupérer les listes sans export manuel. Branchement retenu (Pipecorn introuvable dans le catalogue des connecteurs claude.ai) : **secret réseau** sur `mcp.pipecorn.com`, en-tête `X-API-Key`, préfixe vide, + `.mcp.json` à la racine (connexion HTTP directe, sans clé : le proxy l'ajoute) et `.claude/settings.json` (serveur pré-approuvé). Les outils Pipecorn apparaissent au démarrage d'une nouvelle session. Avant toute grosse extraction ou enrichissement : outils `preview_*` et `get_credits` pour estimer les crédits. Ne jamais mettre la clé Pipecorn dans `Authorization` (réservé au jeton OAuth) ;
 - **Minari** : API REST `https://api.minari.ai` (doc : https://api.minari.ai/docs), en-tête `Authorization: Bearer <clé>`. Deux clés ont été collées dans le chat le 24/10 : à régénérer, jamais réutiliser.
 - **Nommage des listes dans Google Sheets** : convention à valider par Flavien.
+
+### Premier test réel (24/10/2026) : experts-comptables associés, 11-50, Nouvelle-Aquitaine
+
+Dossier `clients/test-ec-nouvelle-aquitaine/`. Consigne en une phrase → recherche Sales
+Navigator via Pipecorn (152 profils) → 1 doublon → sites récupérés → 2 boucles de test
+(5 erreurs, puis 1 sur 50 ; prompt v3) → 151 lignes qualifiées : 45 Oui, 70 Non, 36 À vérifier.
+Décisions en attente de Flavien : futurs experts-comptables (mémorialistes, stagiaires),
+tolérance sur la limite des 50 personnes, effectif déclaré accepté quand le site n'en dit rien.
 
 ### Accès constatés le 24/10/2026 (à revérifier en début de session)
 
@@ -108,7 +116,7 @@ Bientôt :
 5. Forme des exclusions envoyées par les clients (Excel CRM, liste d'entreprises, domaines…).
 6. Google Sheets : import manuel ou compte de service ? Modèle de Sheet commun (case « validé » pour le client) ?
 7. Comment le client valide aujourd'hui (supprime, colore, ajoute une colonne) ?
-8. Le dépôt GitHub est-il bien privé ? (registre et exports contiennent des données personnelles.)
+8. **Le dépôt GitHub est public** (constaté le 24/10) : le passer en privé (GitHub → Settings → General → Danger Zone → Change visibility). En attendant, `.gitignore` exclut `brut/`, `travail/`, `propre/`, `exclusions/` et le registre : ces fichiers restent dans la session et ne sont jamais envoyés.
 
 Plus tard : doc API Pipecorn et forfait ; doc API Minari et mapping par client ; volume mensuel ScrapingBee.
 

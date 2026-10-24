@@ -39,14 +39,17 @@ les cas bizarres dans le fichier de verdicts si besoin.
 
 ## 3. Récupérer le contenu des sites
 
-Une seule fois par domaine, mis en cache dans `clients/<client>/travail/sites/` pour ne jamais
-repayer. ScrapingBee si la clé et l'accès réseau sont en place, sinon visite directe.
-Lignes sans site : chercher le site officiel ; homonyme → trancher par secteur et ville ;
-sinon écrire « introuvable » (jamais deviner).
-
-**État au 24/10/2026 : accès aux sites bloqué dans l'environnement cloud** (voir `CLAUDE.md`).
-Tant que c'est le cas, seul le critère Intitulé peut être jugé ; les critères entreprise restent
-« À vérifier » et il faut le dire à Flavien.
+```
+python3 scripts/recuperer_sites.py clients/<client>/travail/<export>_prepare.csv clients/<client>/travail/sites
+```
+- Une seule fois par domaine, cache dans `travail/sites/` (jamais repayé). Visite directe,
+  ScrapingBee en secours. Au 24/10/2026 : environ 88 % des sites récupérés du premier coup.
+- Lignes sans site ou site en panne : ce sont les sous-agents qui cherchent (recherche web)
+  pendant la qualification. Homonyme → trancher par secteur et ville ; sinon « introuvable ».
+- Sources de secours fiables : annuaire officiel des entreprises
+  (`recherche-entreprises.api.gouv.fr`, joignable : effectif, NAF, siège), Pappers, annuaires
+  professionnels (Ordre, Compteo, Finalib). Le statut « QUALIFIED / DISQUALIFIED » de Pipecorn
+  n'est qu'un indice (il rate les entreprises mal renseignées).
 
 ## 4. Qualifier ligne par ligne
 
@@ -56,6 +59,12 @@ Tant que c'est le cas, seul le critère Intitulé peut être jugé ; les critèr
 - Mise en œuvre : sous-agents (outil Agent) recevant chacun le prompt + un paquet de 10 lignes
   maximum (données de la ligne + extrait du site), avec la consigne de juger chaque ligne
   séparément et de rendre une ligne CSV par prospect.
+- Format de sortie d'un agent : `"ID ligne","<critère 1>",…,"Justification","Site officiel"`.
+- **Entre deux vagues d'agents, transmettre les sites officiels déjà trouvés** à tous les
+  prospects du même cabinet (champ « Site officiel déjà trouvé » dans le lot) : sinon un agent
+  trouve le site et un autre non, et les verdicts entreprise divergent.
+- Après la dernière vague : vérifier que les prospects d'une même entreprise ont les mêmes
+  verdicts entreprise, harmoniser à la main en le notant dans la justification.
 - Rassembler les réponses dans `clients/<client>/travail/<export>_verdicts.csv` :
   `ID ligne,<critère 1>,<critère 2>,…,Justification` (valeurs Oui / Non / À vérifier).
 

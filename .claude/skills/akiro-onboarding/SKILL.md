@@ -50,6 +50,17 @@ Proposer, prêts à copier :
   fonction, niveau hiérarchique, secteurs, effectif, zone, « a changé de poste », etc. ;
 - Pharow : les mêmes critères dans ses filtres (NAF en indice seulement).
 Noter les filtres retenus dans `contexte.md` (section dédiée).
+
+**Recherche lancée directement (Pipecorn, testé le 24/10/2026)** : traduire la cible en filtres
+`advanced_search_leads` avec `live: true` (Sales Navigator). Identifiants à résoudre, jamais à
+deviner : zones avec `search_locations` (`source: "live"`), secteurs avec `search_industries` ;
+niveau hiérarchique 320 = Owner / Partner ; tailles « 11-50 »… Toujours
+`preview_advanced_search_leads` d'abord (gratuit) : montrer à Flavien le nombre de résultats,
+les filtres en tableau et les 25 exemples (avec les intrus repérés), et attendre son accord
+avant d'extraire (quota de profils par jour, pas de crédits). Pas de lien Sales Navigator
+cliquable : Flavien vérifie sur l'aperçu ou refait les filtres. Récupérer le résultat de
+`get_job_result` dans un fichier (requête HTTP directe au serveur MCP) plutôt que dans la
+conversation, puis l'écrire en CSV dans `brut/` (`pipecorn_<cible>_<date>.csv`).
 Ne jamais inventer un identifiant de filtre Sales Navigator (secteur, zone…) : partir d'une URL
 réelle créée par Flavien et la modifier. Si une recherche dépasse la limite d'export, le skill
 `salesnav-slicer` (dépôt github.com/zoxeavv/salesnav-slicer) la découpe en sous-recherches ;
