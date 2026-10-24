@@ -44,10 +44,11 @@ Principe : ne jamais juger 1 000 lignes dans un seul contexte (la qualité se d�
 - Toujours tester sur 50 lignes avant un traitement complet.
 - Jamais de lignes supprimées : les Non restent, avec leur verdict, pour pouvoir justifier au client.
 - Quand un process a fonctionné pour un client, le transformer en skill réutilisable :
-  - `skills/akiro-cleaning` : skill socle (règles communes) ;
-  - `skills/cleaning-<client>` : cible, critères, exclusions apprises, mapping Minari.
+  - `.claude/skills/akiro-cleaning` : skill socle (règles communes) — existe ;
+  - `.claude/skills/akiro-onboarding` : brief → `contexte.md` → prompt de qualification — existe ;
+  - `.claude/skills/cleaning-<client>` : cible, critères, exclusions apprises, mapping Minari.
 
-## Dédoublonnage (à construire)
+## Dédoublonnage
 
 But : ne jamais re-traiter ni re-payer (crédits Pipecorn, scraping, qualification) un prospect déjà connu.
 
@@ -55,22 +56,48 @@ But : ne jamais re-traiter ni re-payer (crédits Pipecorn, scraping, qualificati
 - **Exclusions par client** dans `clients/<client>/exclusions/` : clients existants du client, prospects déjà en cours chez lui, listes déjà appelées. Fichiers fournis par Flavien, formats variés.
 - Le dédoublonnage passe **en premier**, avant la qualification et avant tout appel payant.
 - Conformément à la règle « jamais de lignes supprimées », un doublon reste dans le fichier avec un motif (ex. « Doublon : déjà extrait le 12/09 pour <client> », « Déjà client »), mais il n'est ni qualifié ni enrichi.
-- À trancher : registre global ou par client ? Où le stocker (Airtable, Google Sheet, fichier) ?
+- Construit (24/10) : `scripts/dedoublonner.py`. Ordre des contrôles : exclusions du client → registre → doublons internes. Un fichier dans `exclusions/` exclut les **entreprises** listées (tous leurs contacts) ; un fichier dans `exclusions/personnes/` n'exclut que les **personnes** listées. Le motif reprend le nom du fichier : bien nommer les fichiers (`deja-clients.xlsx`, `en-cours.csv`…).
+- Registre : pour l'instant `registre/registre.csv` (global, une ligne par prospect extrait, avec client, date, fichier). Proposition : le basculer dans **Airtable** (connecteur déjà branché) — en attente de la validation de Flavien.
+- Prospect déjà extrait pour un **autre** client : bloqué par défaut ; option « signaler seulement » disponible. Règle définitive et durée de validité (6 mois, 12 mois, toujours ?) à trancher par Flavien.
 
 ## Feuille de route de la « machine »
 
-1. Onboarding d'un nouveau client : brief en vrac → questions manquantes → `contexte.md`.
-2. Génération de l'URL de recherche Sales Navigator à partir de la cible.
-3. Extraction des prospects (Pipecorn si son API le permet, à vérifier ; sinon export manuel).
-4. Dédoublonnage (registre + exclusions client).
-5. Qualification ligne par ligne (boucle de test sur 50 lignes).
-6. Écriture dans un Google Sheet pour validation client (mode d'accès Google à choisir).
-7. Après validation : enrichissement des mobiles (Pipecorn), puis import Minari.
-8. Capitalisation : exclusions apprises et règles ajoutées au skill du client.
+Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 
-Les skills seront rangés dans `.claude/skills/<nom>/SKILL.md` pour être chargés automatiquement.
+| # | Étape | Qui fait quoi | État |
+| --- | --- | --- | --- |
+| 1 | Onboarding client : brief en vrac → questions → `contexte.md` → `prompt_qualification.md` | Flavien colle le brief ; Claude remplit (skill `akiro-onboarding`) | ✅ prêt |
+| 2 | Filtres Sales Navigator / Pharow à partir de la cible | Claude propose les filtres à copier ; URL complète auto plus tard si utile | ✅ prêt (version simple) |
+| 3 | Extraction des prospects | Flavien dépose l'export dans `brut/` ; `scripts/lire_export.py` reconnaît les colonnes | ✅ manuel / ⏳ Pipecorn (doc API + accès) |
+| 4 | Dédoublonnage (exclusions client + registre + doublons internes) + nettoyage des noms | `scripts/dedoublonner.py` | ✅ prêt (registre en fichier ; Airtable à valider) |
+| 5 | Qualification ligne par ligne, boucle de test 50 lignes, livraison CSV + résumé | Sous-agents Claude, même prompt par ligne ; `scripts/livrer.py` calcule le Verdict | 🟠 intitulés jugeables ; critères entreprise **bloqués** tant que les sites sont inaccessibles |
+| 6 | Google Sheet pour validation client | Aujourd'hui : Flavien importe le CSV. Plus tard : compte de service Google (API joignable) ou n8n | ✅ manuel / ⏳ auto |
+| 7 | Enrichissement mobiles (Pipecorn) puis import Minari | N'enrichir que les Oui validés par le client, jamais un doublon ; crédits estimés avant ; test sur 5 lignes | ⏳ doc API + accès |
+| 8 | Capitalisation : exclusions apprises → `contexte.md`, prompt, skill `cleaning-<client>` ; registre à jour | Claude après chaque retour client | ✅ prêt |
 
-Points à vérifier en début de session : accès réseau de l'environnement (ScrapingBee, Pipecorn, Minari, Google bloqués au 21/10 ; réglage grisé côté Flavien), documentation API Pipecorn (lien à fournir par Flavien).
+### Accès constatés le 24/10/2026 (à revérifier en début de session)
+
+- **Bloqués** par le réglage réseau de l'environnement cloud : ScrapingBee, Pipecorn, Minari, LinkedIn, sites des entreprises (visite directe et outil de lecture web), annuaire officiel des entreprises (api.gouv), societe.com, api.airtable.com en direct.
+- **Joignables** : API Google (Sheets/Drive, il faut un compte de service), recherche web intégrée (limitée), connecteur **Airtable** (utilisable par Claude), connecteur **Notion**.
+- Connecteur **n8n Akiro** : installé côté claude.ai mais pas activé dans les sessions de ce dépôt. n8n ayant accès à Internet, il peut servir de **passerelle** (ScrapingBee, Pipecorn, Minari) si le réglage réseau reste bloqué.
+- Débloquer en direct : menu de l'environnement cloud → Edit → Network access → ajouter les domaines (ScrapingBee, Pipecorn, Minari). Réglage grisé chez Flavien : probablement à faire par un administrateur de l'organisation claude.ai. Doc : https://code.claude.com/docs/en/cloud-environments#network-access
+- Aucune clé API présente dans la session au 24/10.
+
+### Questions ouvertes pour Flavien
+
+Bloquantes :
+1. Accès réseau : qui administre l'organisation claude.ai, peut-il autoriser ScrapingBee / Pipecorn / Minari ? Sinon, OK pour passer par n8n ?
+2. Registre : OK pour Airtable, global avec colonne client ? Prospect déjà extrait pour un autre client : bloqué ou seulement signalé ? Durée de validité ?
+3. Premier client test : lequel, avec un vrai export et le brief ?
+
+Bientôt :
+4. Un export type Pharow et un Sales Navigator (même 20 lignes) pour figer la lecture des colonnes.
+5. Forme des exclusions envoyées par les clients (Excel CRM, liste d'entreprises, domaines…).
+6. Google Sheets : import manuel ou compte de service ? Modèle de Sheet commun (case « validé » pour le client) ?
+7. Comment le client valide aujourd'hui (supprime, colore, ajoute une colonne) ?
+8. Le dépôt GitHub est-il bien privé ? (registre et exports contiennent des données personnelles.)
+
+Plus tard : doc API Pipecorn et forfait ; doc API Minari et mapping par client ; volume mensuel ScrapingBee.
 
 ## Format de livraison
 
@@ -82,14 +109,23 @@ Points à vérifier en début de session : accès réseau de l'environnement (Sc
 
 ```
 clients/
-  _modele/            modèle à copier pour un nouveau client
+  _modele/                  modèle à copier pour un nouveau client
   <client>/
-    contexte.md       cible et critères du client
-    brut/             exports d'origine (Pharow, Sales Navigator)
-    propre/           fichiers qualifiés livrés
-scripts/              scripts de traitement (scraping, qualification, nettoyage)
-skills/               skills réutilisables (akiro-cleaning, cleaning-<client>)
-.env                  clés API (jamais versionné)
+    contexte.md             cible et critères du client
+    prompt_qualification.md prompt écrit par Claude, corrigé pendant la boucle de test
+    brut/                   exports d'origine (Pharow, Sales Navigator) — jamais modifiés
+    exclusions/             clients existants, en cours… (exclut les entreprises)
+      personnes/            listes déjà appelées… (exclut seulement les personnes)
+    travail/                fichiers intermédiaires (_prepare.csv, _verdicts.csv, cache des sites)
+    propre/                 fichiers qualifiés livrés
+registre/registre.csv       prospects déjà extraits, tous clients (en attendant Airtable)
+scripts/
+  lire_export.py            lecture CSV/Excel, repérage des colonnes
+  normaliser.py             nettoyage prénom / nom / raison sociale, clés de comparaison
+  dedoublonner.py           étape 4
+  livrer.py                 calcul du Verdict, CSV livré, résumé
+.claude/skills/             skills chargés automatiquement (akiro-onboarding, akiro-cleaning, cleaning-<client>)
+.env                        clés API (jamais versionné)
 ```
 
 ## Clés API et outils
