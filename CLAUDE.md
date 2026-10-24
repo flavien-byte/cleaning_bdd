@@ -88,7 +88,7 @@ Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 
 ### Accès constatés le 24/10/2026 (à revérifier en début de session)
 
-**Mise à jour 24/10, fin de journée : accès réseau complet.** Sites des entreprises joignables. Secrets réseau vérifiés : **ScrapingBee ✅** (page récupérée), **Minari ✅** (authentification acceptée). **Pipecorn** : secret à créer par Flavien, puis nouvelle session. Le détail ci-dessous date d'avant ce changement.
+**Mise à jour 24/10, fin de journée : accès réseau complet.** Sites des entreprises joignables. Secrets réseau vérifiés : **ScrapingBee ✅** (page récupérée), **Minari ✅** (authentification acceptée). **Pipecorn ❌ (test du 24/10)** : serveur joignable et les 41 outils sont listés, mais chaque appel répond « 401 Invalid API key » → le secret réseau existe mais la clé est refusée (valeur à recopier depuis app.pipecorn.com, en-tête `X-API-Key`, préfixe vide, sans espace). Le serveur MCP local (`mcp-remote`) a aussi dépassé le délai de connexion de 30 s au démarrage. Le détail ci-dessous date d'avant ce changement.
 
 - **Bloqués** par le réglage réseau de l'environnement cloud : ScrapingBee, Pipecorn (dont mcp.pipecorn.com), Minari, LinkedIn, sites des entreprises (visite directe et outil de lecture web), annuaire officiel des entreprises (api.gouv), societe.com, api.airtable.com en direct.
 - **Joignables** : API Google (Sheets/Drive, il faut un compte de service), recherche web intégrée (limitée), connecteur **Airtable** (utilisable par Claude), connecteur **Notion**.
