@@ -75,9 +75,20 @@ Plan conçu avec Flavien le 24/10/2026. État de chaque étape :
 | 7 | Enrichissement mobiles (Pipecorn) puis import Minari | N'enrichir que les Oui validés par le client, jamais un doublon ; crédits estimés avant ; test sur 5 lignes | ⏳ doc API + accès |
 | 8 | Capitalisation : exclusions apprises → `contexte.md`, prompt, skill `cleaning-<client>` ; registre à jour | Claude après chaque retour client | ✅ prêt |
 
+### Décisions du 24/10/2026 (2e échange)
+
+- **On avance en deux temps.** Phase 1 : jusqu'au fichier propre, envoyé au client pour validation (étapes 1 à 6). Phase 2 : Pipecorn + Minari (étape 7). On ne commence la phase 2 qu'une fois la phase 1 rodée.
+- **Le kickoff est la source n°1 du contexte client** : Flavien colle le transcript (ou Claude le retrouve dans Notion) ; il est gardé tel quel dans `clients/<client>/kickoff.md`, les règles qui en sortent vont dans `contexte.md` avec la phrase citée. Le client fournit aussi une **wishlist** et une liste **no-go**.
+- **Les entreprises aussi doivent être nettoyées**, pas seulement les intitulés : il faut des informations sur chaque entreprise (site via ScrapingBee, données Pipecorn, à défaut recherche web). En attendant l'accès aux sites, la recherche web intégrée peut servir pour la boucle de test sur 50 lignes.
+- **Objectif : ne plus faire d'export à la main.** Claude construit la recherche Sales Navigator à partir du contexte, puis la liste est récupérée directement (piste : outils Pipecorn — à vérifier une fois connecté). On ne pilote pas LinkedIn en direct depuis le cloud (bloqué, et risque pour le compte LinkedIn).
+- **salesnav-slicer** (github.com/zoxeavv/salesnav-slicer, d'un collègue) : découpe une recherche Sales Navigator **d'entreprises** trop grosse (≥ 1 000 résultats) en sous-recherches exportables, en pilotant Chrome. Il ne récupère pas les listes. Il s'utilise depuis Claude sur l'ordinateur de Flavien (Chrome), pas dans cette session cloud.
+- **Pipecorn** : serveur MCP officiel `https://mcp.pipecorn.com/mcp` (clé dans l'en-tête `X-API-Key`). Déclaré dans `.mcp.json` à la racine ; il fonctionnera quand (1) la variable `PIPECORN_API_KEY` sera dans les secrets de l'environnement et (2) `mcp.pipecorn.com` sera autorisé dans le réseau.
+- **Minari** : clé à mettre dans les secrets de l'environnement sous `MINARI_API_KEY`, jamais dans le chat (une clé collée le 24/10 doit être régénérée par Flavien).
+- **Nommage des listes dans Google Sheets** : convention à valider par Flavien.
+
 ### Accès constatés le 24/10/2026 (à revérifier en début de session)
 
-- **Bloqués** par le réglage réseau de l'environnement cloud : ScrapingBee, Pipecorn, Minari, LinkedIn, sites des entreprises (visite directe et outil de lecture web), annuaire officiel des entreprises (api.gouv), societe.com, api.airtable.com en direct.
+- **Bloqués** par le réglage réseau de l'environnement cloud : ScrapingBee, Pipecorn (dont mcp.pipecorn.com), Minari, LinkedIn, sites des entreprises (visite directe et outil de lecture web), annuaire officiel des entreprises (api.gouv), societe.com, api.airtable.com en direct.
 - **Joignables** : API Google (Sheets/Drive, il faut un compte de service), recherche web intégrée (limitée), connecteur **Airtable** (utilisable par Claude), connecteur **Notion**.
 - Connecteur **n8n Akiro** : installé côté claude.ai mais pas activé dans les sessions de ce dépôt. n8n ayant accès à Internet, il peut servir de **passerelle** (ScrapingBee, Pipecorn, Minari) si le réglage réseau reste bloqué.
 - Débloquer en direct : menu de l'environnement cloud → Edit → Network access → ajouter les domaines (ScrapingBee, Pipecorn, Minari). Réglage grisé chez Flavien : probablement à faire par un administrateur de l'organisation claude.ai. Doc : https://code.claude.com/docs/en/cloud-environments#network-access

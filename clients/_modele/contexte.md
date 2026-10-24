@@ -19,6 +19,14 @@ Copier le dossier `clients/_modele/` en `clients/<client>/` puis remplir ce fich
 - Exclusions :
 - Concurrents (à exclure) :
 
+## Wishlist (comptes cibles prioritaires)
+
+## No-go (comptes interdits)
+Clients actuels, prospects en cours, partenaires, concurrents. Le fichier fourni va dans `exclusions/`.
+
+## Ce qui s'est dit au kickoff
+Transcript complet dans `kickoff.md`. Ici : les règles tirées de l'appel, avec la phrase citée.
+
 ## Fichiers d'exclusion fournis
 Déposés dans `exclusions/` (une entreprise listée exclut tous ses contacts) ou
 `exclusions/personnes/` (seules les personnes listées sont exclues).

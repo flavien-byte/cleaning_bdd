@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "pipecorn": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.pipecorn.com/mcp",
+        "--header",
+        "X-API-Key:${PIPECORN_API_KEY:-}"
+      ]
+    }
+  }
+}
